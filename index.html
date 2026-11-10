@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>VoiceCare | Accessible Reminder Assistant</title>
+    <style>
+        :root {
+            font-family: Inter, system-ui, Arial, sans-serif;
+            color: #17243c;
+            background: #f4f7fc
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                linear-gradient(rgba(244, 247, 252, .82), rgba(244, 247, 252, .82)),
+                url("image.png") center / cover fixed no-repeat
+        }
+
+        button,
+        input,
+        select {
+            font: inherit
+        }
+
+        button {
+            cursor: pointer
+        }
+
+        button:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 3px solid #2563eb;
+            outline-offset: 2px
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 245px 1fr;
+            min-height: 100vh
+        }
+
+        .side {
+            background: #102b52;
+            color: white;
+            padding: 25px 18px
+        }
+
+        .brand {
+            font-size: 23px;
+            font-weight: 800;
+            margin-bottom: 32px
+        }
+
+        .nav {
+            display: block;
+            width: 100%;
+            text-align: left;
+            border: 0;
+            border-radius: 12px;
+            background: transparent;
+            color: #d7e4f8;
+            padding: 14px;
+            margin: 7px 0
+        }
+
+        .nav.active,
+        .nav:hover {
+            background: #274c7d;
+            color: #fff
+        }
+
+        main {
+            padding: 27px;
+            max-width: 1450px;
+            width: 100%;
+            margin: auto
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap
+        }
+
+        h1 {
+            font-size: 29px;
+            margin: 0 0 8px
+        }
+
+        p {
+            color: #60718b
+        }
+
+        .pill {
+            background: #e0f2fe;
+            color: #075985;
+            padding: 10px 14px;
+            border-radius: 30px;
+            font-weight: 700
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin: 25px 0
+        }
+
+        .card,
+        .panel {
+            background: rgba(255, 255, 255, .94);
+            backdrop-filter: blur(5px);
+            border: 1px solid #e1e8f3;
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 6px 22px #1b3b6610
+        }
+
+        .stat {
+            font-size: 34px;
+            font-weight: 800;
+            color: #153e77
+        }
+
+        .muted {
+            color: #64748b;
+            font-size: 14px
+        }
+
+        .columns {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: 18px
+        }
+
+        .panel h2 {
+            font-size: 20px;
+            margin: 0 0 15px
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 11px;
+            padding: 12px 16px;
+            background: #1d4ed8;
+            color: #fff;
+            font-weight: 700
+        }
+
+        .btn.secondary {
+            background: #e8effa;
+            color: #153e77
+        }
+
+        .btn.danger {
+            background: #fee2e2;
+            color: #991b1b
+        }
+
+        .btn:disabled {
+            opacity: .5
+        }
+
+        .floating-mic {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            z-index: 30;
+            width: 64px;
+            height: 64px;
+            border: 0;
+            border-radius: 50%;
+            background: #1d4ed8;
+            color: white;
+            box-shadow: 0 10px 28px #0f172a4d;
+            font-size: 28px;
+            cursor: pointer
+        }
+
+        .floating-mic:hover {
+            background: #1e40af;
+            transform: translateY(-2px)
+        }
+
+        .floating-mic.listening {
+            background: #dc2626;
+            animation: mic-pulse 1.2s infinite
+        }
+
+        @keyframes mic-pulse {
+            50% {
+                box-shadow: 0 0 0 12px #dc262633, 0 10px 28px #0f172a4d
+            }
+        }
+
+        .item {
+            border: 1px solid #e5eaf2;
+            padding: 14px;
+            border-radius: 13px;
+            margin: 11px 0;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center
+        }
+
+        .item strong {
+            display: block;
+            margin-bottom: 5px
+        }
+
+        .item small {
+            color: #64748b
+        }
+
+        .item .actions {
+            margin: 0
+        }
+
+        .item .btn {
+            padding: 8px 10px;
+            font-size: 12px
+        }
+
+        .assistant {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 15px;
+            padding: 18px;
+            min-height: 145px
+        }
+
+        .orb {
+            font-size: 37px
+        }
+
+        .field {
+            display: grid;
+            gap: 7px;
+            margin: 13px 0
+        }
+
+        input,
+        select {
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            width: 100%;
+            background: white
+        }
+
+        label {
+            font-weight: 650
+        }
+
+        .hidden {
+            display: none !important
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: #0b1c39b8;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+            z-index: 10
+        }
+
+        .modal {
+            background: #fff;
+            width: min(480px, 100%);
+            padding: 27px;
+            border-radius: 20px;
+            max-height: 94vh;
+            overflow: auto
+        }
+
+        .modal h2 {
+            margin-top: 0
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 10px;
+            background: #eaf5ff;
+            color: #144272;
+            margin: 12px 0
+        }
+
+        .connection {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #475569
+        }
+
+        .connection::before {
+            content: "";
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: #f59e0b
+        }
+
+        .connection.online::before {
+            background: #16a34a
+        }
+
+        .connection.offline::before {
+            background: #dc2626
+        }
+
+        .account-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap
+        }
+
+        .foot {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 15px
+        }
+
+        .face-enrollment {
+            margin: 16px 0;
+            padding: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 14px;
+            background: #f8fafc
+        }
+
+        .face-enrollment h4 {
+            margin: 0 0 5px
+        }
+
+        .face-enrollment p {
+            margin: 5px 0 10px;
+            font-size: 13px
+        }
+
+        .face-frame {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            border-radius: 11px;
+            background: #0f172a;
+            transform: scaleX(-1)
+        }
+
+        .face-status[data-state="ready"] {
+            color: #166534;
+            font-weight: 700
+        }
+
+        .face-status[data-state="error"] {
+            color: #991b1b
+        }
+
+        .history-action {
+            display: inline-block;
+            margin-bottom: 5px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            background: #e0e7ff;
+            color: #3730a3;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: capitalize
+        }
+
+        .alert-modal {
+            border-top: 8px solid #dc2626;
+            text-align: center
+        }
+
+        .alert-modal .alert-icon {
+            font-size: 48px;
+            margin-bottom: 8px
+        }
+
+        .alert-modal .actions {
+            justify-content: center
+        }
+
+        @media(max-width:950px) {
+            .cards {
+                grid-template-columns: repeat(2, 1fr)
+            }
+
+            .columns {
+                grid-template-columns: 1fr
+            }
+        }
+
+        @media(max-width:650px) {
+            .floating-mic {
+                right: 16px;
+                bottom: 16px;
+                width: 58px;
+                height: 58px
+            }
+
+            .layout {
+                display: block
+            }
+
+            .side {
+                padding: 13px
+            }
+
+            .brand {
+                margin-bottom: 10px
+            }
+
+            .nav {
+                display: inline-block;
+                width: auto;
+                padding: 9px;
+                margin: 2px
+            }
+
+            main {
+                padding: 15px
+            }
+
+            .cards {
+                gap: 10px
+            }
+
+            .card {
+                padding: 14px
+            }
+
+            .stat {
+                font-size: 27px
+            }
+
+            .item {
+                align-items: flex-start;
+                flex-direction: column
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <aside class="side">
+            <div class="brand">🔊 VoiceCare</div><button class="nav active" data-view="dashboard">🏠
+                Dashboard</button><button class="nav" data-view="today">📅 Today's reminders</button><button class="nav"
+                data-view="all">🗂 All reminders</button><button class="nav" data-view="history">📜 History</button><button class="nav" id="helpNav">❔ Voice
+                commands</button><button class="nav" id="logout">🚪 Logout</button>
+        </aside>
+        <main>
+            <div class="top">
+                <div>
+                    <h1 id="heading">Accessible Reminder Dashboard</h1>
+                    <p>Manage your daily activities with your voice.</p>
+                </div>
+                <div class="account-status"><span class="connection" id="syncStatus" role="status">Firebase connecting</span><span
+                        class="pill" id="userPill">Signed out</span></div>
+            </div>
+            <div class="cards">
+                <div class="card">
+                    <div class="muted">Today's reminders</div>
+                    <div class="stat" id="todayCount">0</div>
+                </div>
+                <div class="card">
+                    <div class="muted">Upcoming</div>
+                    <div class="stat" id="upcomingCount">0</div>
+                </div>
+                <div class="card">
+                    <div class="muted">Daily reminders</div>
+                    <div class="stat" id="dailyCount">0</div>
+                </div>
+                <div class="card">
+                    <div class="muted">Completed</div>
+                    <div class="stat" id="completedCount">0</div>
+                </div>
+            </div>
+            <div class="columns">
+                <section class="panel">
+                    <h2 id="listTitle">Your reminders</h2>
+                    <div class="actions"><button class="btn" id="addBtn">＋ Add reminder</button><button
+                            class="btn secondary" id="readBtn">🔊 Read reminders</button></div>
+                    <div id="reminders" aria-live="polite"></div>
+                </section>
+                <section class="panel">
+                    <h2>🎙 Voice assistant</h2>
+                    <div class="assistant">
+                        <div class="orb" aria-hidden="true">🎤</div>
+                        <p id="assistantMessage" role="status" aria-live="polite">Hello! Press Start Listening and say
+                            “create a reminder” or “read my reminders”.</p>
+                        <div class="muted" id="heard"></div>
+                    </div>
+                    <div class="actions"><button class="btn" id="listenBtn">🎙 Start listening</button><button
+                            class="btn secondary" id="stopBtn">Stop speech</button></div>
+                    <div class="actions"><button class="btn secondary" id="notifyBtn">Enable
+                            notifications</button><button class="btn secondary" id="testBtn">Test alert</button></div>
+                    <p class="foot">Voice recognition uses English (India) and requires a supported browser,
+                        microphone permission, and may require an internet connection. Alerts work reliably while this
+                        page remains open.</p>
+                </section>
+            </div>
+        </main>
+    </div>
+    <div class="overlay" id="loginOverlay">
+        <div class="modal">
+            <h2>Welcome to VoiceCare</h2>
+            <p>Sign in with a registered account. Use the voice assistant or type below.</p>
+            <div class="connection" id="firebaseStatus" role="status">Checking Firebase connection</div>
+            <div class="field"><label for="username">Username</label><input id="username" autocomplete="username"
+                    placeholder="Enter your username"></div>
+            <div class="field"><label for="password">Password</label><input id="password" type="password"
+                    autocomplete="current-password" placeholder="Enter your password"></div>
+            <div class="status" id="loginStatus">Credentials are verified against Firebase. Passwords are stored directly in the account record.
+            </div>
+            <section id="loginFaceVerification" class="face-enrollment hidden" aria-labelledby="loginFaceTitle">
+                <h4 id="loginFaceTitle">Face verification</h4>
+                <p id="loginFaceStatus" class="face-status" role="status">Password accepted. Camera verification is required.</p>
+                <video id="loginFaceVideo" class="face-frame" autoplay playsinline muted></video>
+                <canvas id="loginFaceCanvas" class="hidden" width="320" height="240"></canvas>
+                <div class="actions"><button class="btn" type="button" id="verifyLoginFaceBtn">Verify face</button><button
+                        class="btn secondary" type="button" id="cancelFaceLoginBtn">Cancel</button></div>
+            </section>
+            <div class="actions"><button class="btn" id="loginBtn">Sign in</button><button
+                    class="btn secondary" id="voiceLoginBtn">Voice-guided login</button><button
+                    class="btn secondary" id="showRegisterBtn">Register user</button></div>
+            <form id="registerForm" class="hidden">
+                <h3>Create account</h3>
+                <div class="field"><label for="registerName">Full name</label><input id="registerName"
+                        autocomplete="name" required></div>
+                <div class="field"><label for="registerUsername">Username</label><input id="registerUsername"
+                        autocomplete="username" minlength="3" required></div>
+                <div class="field"><label for="registerEmail">Email address</label><input id="registerEmail"
+                        type="email" autocomplete="email" required></div>
+                <div class="field"><label for="registerContact">Contact number</label><input id="registerContact"
+                        type="tel" autocomplete="tel"></div>
+                <div class="field"><label for="registerPassword">Password</label><input id="registerPassword"
+                        type="password" autocomplete="new-password" minlength="8" required></div>
+                <div class="field"><label for="registerConfirm">Confirm password</label><input id="registerConfirm"
+                        type="password" autocomplete="new-password" minlength="8" required></div>
+                <section class="face-enrollment" aria-labelledby="faceEnrollmentTitle">
+                    <h4 id="faceEnrollmentTitle">Face enrollment</h4>
+                    <p>Capture one clear, front-facing photo. The photo is stored with this Firebase account.</p>
+                    <video id="registerFaceVideo" class="face-frame hidden" autoplay playsinline muted></video>
+                    <img id="registerFacePreview" class="face-frame hidden" alt="Captured registration face preview">
+                    <canvas id="registerFaceCanvas" class="hidden" width="320" height="240"></canvas>
+                    <div class="actions"><button class="btn secondary" type="button" id="startFaceCameraBtn">Start camera</button><button
+                            class="btn" type="button" id="captureFaceBtn" disabled>Capture face</button><button
+                            class="btn secondary hidden" type="button" id="retakeFaceBtn">Retake</button></div>
+                    <p id="faceStatus" class="face-status" role="status">Face capture is required before registration.</p>
+                </section>
+                <div class="actions"><button class="btn" type="submit">Save account to Firebase</button><button
+                        class="btn secondary" type="button" id="cancelRegisterBtn">Cancel</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="overlay hidden" id="reminderOverlay">
+        <div class="modal">
+            <h2 id="formHeading">Add reminder</h2>
+            <form id="reminderForm">
+                <div class="field"><label for="title">Reminder purpose</label><input id="title" required
+                        placeholder="e.g. Take medicine"></div>
+                <div class="field"><label for="date">Date</label><input id="date" type="date" required></div>
+                <div class="field"><label for="time">Time</label><input id="time" type="time" required></div>
+                <div class="field"><label for="frequency">Repeat</label><select id="frequency">
+                        <option value="once">One time</option>
+                        <option value="daily">Every day</option>
+                    </select></div>
+                <div class="actions"><button class="btn" type="submit">Save reminder</button><button
+                        class="btn secondary" type="button" id="cancelBtn">Cancel</button></div>
+            </form>
+        </div>
+    </div>
+    <div class="overlay hidden" id="alertOverlay" role="dialog" aria-modal="true" aria-labelledby="alertTitle">
+        <div class="modal alert-modal">
+            <div class="alert-icon" aria-hidden="true">🔔</div>
+            <h2 id="alertTitle">Reminder alert</h2>
+            <p id="alertMessage" role="alert" aria-live="assertive"></p>
+            <p>Press the button or say “acknowledge”, “done”, or “got it”.</p>
+            <div class="actions"><button class="btn" type="button" id="acknowledgeBtn">Acknowledge</button></div>
+        </div>
+    </div>
+    <button class="floating-mic" type="button" id="floatingMicBtn" aria-label="Start voice assistant"
+        aria-pressed="false" title="Start voice assistant">🎙</button>
+    <script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/dist/face-api.js"></script>
+    <script src="KS5787.js"></script>
+</body>
+
+</html>
